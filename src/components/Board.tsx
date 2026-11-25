@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useTasks } from '@/hooks/useTasks';
 import { COLUMNS, matchesTitle } from '@/lib/board';
+import { AddTaskForm } from './AddTaskForm';
 import { Column } from './Column';
 import styles from './Board.module.css';
 
@@ -16,6 +17,7 @@ export function Board() {
     moveTask,
     moveErrors,
     dismissMoveError,
+    addTask,
     announcement,
   } = useTasks();
   const isLoading = loadState === 'loading';
@@ -75,7 +77,11 @@ export function Board() {
                 isLoading={isLoading}
                 pendingIds={pendingIds}
                 onMove={moveTask}
-              />
+              >
+                {/* New tasks start in To do, so the form lives there. It waits for
+                    the first load, so a new task can't be lost when the list arrives. */}
+                {column.status === 'TODO' && !isLoading && <AddTaskForm onAdd={addTask} />}
+              </Column>
             );
           })}
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getTasks, updateTaskStatus } from '@/api/tasks';
+import { createTask, getTasks, updateTaskStatus } from '@/api/tasks';
 import { statusLabel, withStatus } from '@/lib/board';
 import type { Task, TaskStatus } from '@/types';
 
@@ -91,6 +91,17 @@ export function useTasks() {
     }
   }
 
+  /**
+   * Creates a task. Not optimistic: the card appears once the API has
+   * answered, because the API is what gives the task its id. If the API
+   * rejects the title, the error goes to the caller (the form shows it).
+   */
+  async function addTask(title: string) {
+    const created = await createTask({ title });
+    setTasks((current) => [...current, created]);
+    setAnnouncement(`Added “${created.title}” to ${statusLabel(created.status)}.`);
+  }
+
   function dismissMoveError(taskId: string) {
     setMoveErrors((errors) => errors.filter((error) => error.taskId !== taskId));
   }
@@ -103,6 +114,7 @@ export function useTasks() {
     moveTask,
     moveErrors,
     dismissMoveError,
+    addTask,
     announcement,
   };
 }

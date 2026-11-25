@@ -1,0 +1,54 @@
+.form {
+  margin-top: 0.75rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* The field takes the space the button leaves, and may shrink. */
+.row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.row button {
+  flex-shrink: 0;
+}
+
+/* Field with a problem: red border, as well as the message below it. */
+.row input[aria-invalid='true'] {
+  border-color: var(--danger-text);
+}
+
+/* Error on the left, character count on the right. */
+.below {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.error {
+  color: var(--danger-text);
+}
+
+.counter,
+.counterOver {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.counterOver {
+  font-weight: 600;
+  color: var(--danger-text);
+}

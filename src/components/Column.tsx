@@ -15,6 +15,8 @@ interface ColumnProps {
   /** Ids of tasks whose move is still being saved. */
   pendingIds: string[];
   onMove: (task: Task, nextStatus: TaskStatus) => void;
+  /** Shown between the header and the cards (the add-task form). */
+  children?: React.ReactNode;
 }
 
 export function Column({
@@ -26,6 +28,7 @@ export function Column({
   isLoading,
   pendingIds,
   onMove,
+  children,
 }: ColumnProps) {
   const headingId = `column-${status}`;
   // The count is always the real size of the column. During a search it also
@@ -39,6 +42,8 @@ export function Column({
         {/* No count while loading: we don't know it yet, and "0" would be wrong. */}
         {!isLoading && <span className={styles.count}> ({count})</span>}
       </h2>
+
+      {children}
 
       {isLoading ? (
         <LoadingCards />
