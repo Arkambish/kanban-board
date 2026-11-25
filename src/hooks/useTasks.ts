@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createTask, getTasks, updateTaskStatus } from '@/api/tasks';
 import { statusLabel, withStatus } from '@/lib/board';
 import type { Task, TaskStatus } from '@/types';
@@ -22,6 +22,8 @@ export function useTasks() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   // Ids of tasks whose move is still being saved.
   const [pendingIds, setPendingIds] = useState<string[]>([]);
+  // Lock synchronously: state alone cannot block a second call before React renders.
+  const pendingMoves = useRef(new Set<string>());
   const [moveErrors, setMoveErrors] = useState<MoveError[]>([]);
   // Latest change in words, read out by screen readers.
   const [announcement, setAnnouncement] = useState('');
@@ -59,7 +61,8 @@ export function useTasks() {
   async function moveTask(task: Task, nextStatus: TaskStatus) {
     // Only one move per task at a time. With a single request in flight we
     // always know which status to go back to if it fails.
-    if (pendingIds.includes(task.id)) return;
+    if (pendingMoves.current.has(task.id) || task.status === nextStatus) return;
+    pendingMoves.current.add(task.id);
 
     const previousStatus = task.status;
     const from = statusLabel(previousStatus);
@@ -87,6 +90,7 @@ export function useTasks() {
         },
       ]);
     } finally {
+      pendingMoves.current.delete(task.id);
       setPendingIds((ids) => ids.filter((id) => id !== task.id));
     }
   }
