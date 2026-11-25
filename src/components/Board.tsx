@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import type { Task, TaskStatus } from '@/types';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useTasks } from '@/hooks/useTasks';
 import { COLUMNS, matchesTitle } from '@/lib/board';
@@ -27,6 +28,34 @@ export function Board() {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebouncedValue(query, 300);
   const isFiltering = debouncedQuery.trim() !== '';
+  const focusTransfer = useRef<{ taskId: string; element: Element } | null>(null);
+
+  function handleMove(task: Task, nextStatus: TaskStatus) {
+    const active = document.activeElement;
+    const card = document.getElementById(`task-title-${task.id}`)?.closest('li');
+    if (active && card?.contains(active)) {
+      focusTransfer.current = { taskId: task.id, element: active };
+    }
+    void moveTask(task, nextStatus);
+  }
+
+  // Moving between columns remounts the card. Keep keyboard focus with it,
+  // including rollback, unless the user has focused another control meanwhile.
+  useLayoutEffect(() => {
+    const transfer = focusTransfer.current;
+    if (!transfer) return;
+    if (transfer.element.isConnected) {
+      if (document.activeElement !== transfer.element) focusTransfer.current = null;
+      return;
+    }
+    const heading = document.getElementById(`task-title-${transfer.taskId}`);
+    if (heading && document.activeElement === document.body) {
+      heading.focus();
+      transfer.element = heading;
+    } else {
+      focusTransfer.current = null;
+    }
+  }, [tasks, debouncedQuery]);
 
   return (
     <main className={styles.page}>
@@ -76,7 +105,7 @@ export function Board() {
                 isFiltering={isFiltering}
                 isLoading={isLoading}
                 pendingIds={pendingIds}
-                onMove={moveTask}
+                onMove={handleMove}
               >
                 {/* New tasks start in To do, so the form lives there. It waits for
                     the first load, so a new task can't be lost when the list arrives. */}

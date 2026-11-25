@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, createElement } from 'react';
+import { act, createElement, useLayoutEffect } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import * as api from '@/api/tasks';
@@ -11,7 +11,8 @@ let root: Root;
 let board: ReturnType<typeof useTasks>;
 
 function Probe() {
-  board = useTasks();
+  const state = useTasks();
+  useLayoutEffect(() => { board = state; });
   return null;
 }
 

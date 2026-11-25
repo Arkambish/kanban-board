@@ -16,7 +16,7 @@ export function TaskCard({ task, isPending, onMove }: TaskCardProps) {
 
   return (
     <li className={styles.card}>
-      <h3 id={titleId} className={styles.title}>
+      <h3 id={titleId} className={styles.title} tabIndex={-1}>
         {task.title}
       </h3>
 

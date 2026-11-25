@@ -12,6 +12,7 @@ export function AddTaskForm({ onAdd }: AddTaskFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const savingRef = useRef(false);
 
   const length = title.trim().length;
 
@@ -28,7 +29,8 @@ export function AddTaskForm({ onAdd }: AddTaskFormProps) {
   async function handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     // Stop the browser from reloading the page, which is what a form does by default.
     event.preventDefault();
-    if (isSaving) return;
+    const form = event.currentTarget;
+    if (savingRef.current) return;
 
     const problem = validateTitle(title);
     if (problem !== null) {
@@ -38,6 +40,7 @@ export function AddTaskForm({ onAdd }: AddTaskFormProps) {
     }
 
     setError(null);
+    savingRef.current = true;
     setIsSaving(true);
     try {
       await onAdd(title.trim());
@@ -46,9 +49,13 @@ export function AddTaskForm({ onAdd }: AddTaskFormProps) {
       // The API has its own checks. Show what it said under the field too.
       setError(caught instanceof Error ? caught.message : 'Could not add the task');
     } finally {
+      savingRef.current = false;
       setIsSaving(false);
       // Back to the field: ready for the next task, or to fix this one.
-      inputRef.current?.focus();
+      // Do not pull focus away if the user started doing something else while saving.
+      if (form.contains(document.activeElement)) {
+        inputRef.current?.focus();
+      }
     }
   }
 
@@ -81,7 +88,7 @@ export function AddTaskForm({ onAdd }: AddTaskFormProps) {
 
       <div className={styles.below}>
         {error !== null && (
-          <p id="new-task-error" className={styles.error}>
+          <p id="new-task-error" className={styles.error} role="alert">
             {error}
           </p>
         )}
