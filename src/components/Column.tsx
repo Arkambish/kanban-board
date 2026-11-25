@@ -5,29 +5,45 @@ import styles from './Column.module.css';
 interface ColumnProps {
   status: TaskStatus;
   label: string;
-  /** The tasks in this column. */
+  /** The tasks to show: the ones in this column that match the search. */
   tasks: Task[];
+  /** How many tasks are in this column, whether they match the search or not. */
+  total: number;
+  /** True while a search is hiding some tasks. */
+  isFiltering: boolean;
   isLoading: boolean;
   /** Ids of tasks whose move is still being saved. */
   pendingIds: string[];
   onMove: (task: Task, nextStatus: TaskStatus) => void;
 }
 
-export function Column({ status, label, tasks, isLoading, pendingIds, onMove }: ColumnProps) {
+export function Column({
+  status,
+  label,
+  tasks,
+  total,
+  isFiltering,
+  isLoading,
+  pendingIds,
+  onMove,
+}: ColumnProps) {
   const headingId = `column-${status}`;
+  // The count is always the real size of the column. During a search it also
+  // says how many of those are showing, e.g. "(2 of 5)".
+  const count = isFiltering ? `${tasks.length} of ${total}` : `${total}`;
 
   return (
     <section className={styles.column} aria-labelledby={headingId}>
       <h2 id={headingId} className={styles.heading}>
         {label}
         {/* No count while loading: we don't know it yet, and "0" would be wrong. */}
-        {!isLoading && <span className={styles.count}> ({tasks.length})</span>}
+        {!isLoading && <span className={styles.count}> ({count})</span>}
       </h2>
 
       {isLoading ? (
         <LoadingCards />
       ) : tasks.length === 0 ? (
-        <p className={styles.empty}>No tasks</p>
+        <p className={styles.empty}>{total === 0 ? 'No tasks' : 'No tasks match your search'}</p>
       ) : (
         <ul className={styles.list}>
           {tasks.map((task) => (
