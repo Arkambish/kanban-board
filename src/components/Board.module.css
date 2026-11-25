@@ -56,6 +56,10 @@
   flex-direction: column;
   gap: 0.5rem;
   max-width: 36rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  /* Keep keyboard focus rings inside the scrollable area. */
+  padding: 0.25rem;
   margin: 0 auto;
 }
 
@@ -70,6 +74,15 @@
   border: 1px solid var(--danger-border);
   border-radius: var(--radius);
   box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+}
+
+.error p {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.error button {
+  flex-shrink: 0;
 }
 
 .search {
