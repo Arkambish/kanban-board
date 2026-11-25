@@ -21,12 +21,12 @@ Then open http://localhost:3000. You should see a "Task Board" heading and a sho
 
 Other useful commands:
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Starts the app in development mode |
-| `npm run build` | Builds the app for production (also checks types) |
-| `npm run lint` | Runs ESLint |
-| `npm test` | Runs the tests for the mock API |
+| Command              | What it does                                              |
+| -------------------- | --------------------------------------------------------- |
+| `npm run dev`        | Starts the app in development mode                        |
+| `npm run build`      | Builds the app for production (also checks types)         |
+| `npm run lint`       | Runs ESLint                                               |
+| `npm test`           | Runs the tests for the mock API                           |
 | `npm run check-deps` | Checks you haven't added any packages that aren't allowed |
 
 ---
@@ -49,15 +49,15 @@ src/
 ### Types (`src/types.ts`)
 
 ```ts
-type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
+type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
 
 interface Task {
   id: string;
   title: string;
   description?: string;
   status: TaskStatus;
-  dueDate?: string;   // e.g. "2026-12-31"
-  createdAt: string;  // e.g. "2026-11-20T09:30:00.000Z"
+  dueDate?: string; // e.g. "2026-12-31"
+  createdAt: string; // e.g. "2026-11-20T09:30:00.000Z"
 }
 ```
 
@@ -65,10 +65,10 @@ interface Task {
 
 The mock API pretends to be a real server. All functions return Promises.
 
-| Function | What it does |
-|---|---|
-| `getTasks()` | Returns all tasks. Never fails. |
-| `createTask(input)` | Creates a task and returns it. Rejects if the input is invalid (see below). Never fails randomly. |
+| Function                       | What it does                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `getTasks()`                   | Returns all tasks. Never fails.                                                                        |
+| `createTask(input)`            | Creates a task and returns it. Rejects if the input is invalid (see below). Never fails randomly.      |
 | `updateTaskStatus(id, status)` | Moves a task to another column and returns the updated task. **Fails randomly about 20% of the time.** |
 
 Things to know:
@@ -86,6 +86,7 @@ Things to know:
   - the due date isn't a real date in `YYYY-MM-DD` format
 
   If you don't pass a status, the new task goes into `TODO`.
+
 - **You always get copies.** Changing a task object you got from the API doesn't change the API's data. Only the API functions do.
 - **Data resets on reload.** It's all kept in memory.
 - **Browser only.** The data lives in the browser, so you must call these functions from a **Client Component** (a file that starts with `'use client'`). If you call them on the server, you'll get an error telling you so.
@@ -119,15 +120,7 @@ How you structure your components, state and CSS is up to you. We're more intere
 - **Commit as you work.** Make at least 5 commits, and don't squash them. We'd like to see how you got there.
 - **Expected time: 90–120 minutes.** If you run out of time, leave a short note at the end of this README about what you'd do next.
 
----
-
-## 5. In the interview
-
-You'll be asked to make some changes to this code **live**, without AI, while sharing your screen. Make sure you understand every line you wrote.
-
----
-
-## 6. Tips
+## 5. Tips
 
 - Add `?failRate=0` to the URL (http://localhost:3000/?failRate=0) to turn off random failures while you build.
 - Use `?failRate=1` to make every move fail, so you can test your error handling.
@@ -136,7 +129,7 @@ You'll be asked to make some changes to this code **live**, without AI, while sh
 
 ---
 
-## 7. Solution notes
+## 6. Solution notes
 
 ### Run it
 
@@ -147,13 +140,13 @@ npm run dev
 
 Open http://localhost:3000. Node.js 24 is needed (see `.nvmrc`).
 
-| To check | Do this |
-|---|---|
-| Moves that always work | http://localhost:3000/?failRate=0 |
-| Rollback and the error message | http://localhost:3000/?failRate=1, then move any card |
-| Loading state | Reload the page: the columns show grey placeholder cards for up to a second |
-| Stacked layout | Make the window narrower than 768 px |
-| Everything else | `npm run lint`, `npm test`, `npm run build`, `npm run check-deps` |
+| To check                       | Do this                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| Moves that always work         | http://localhost:3000/?failRate=0                                           |
+| Rollback and the error message | http://localhost:3000/?failRate=1, then move any card                       |
+| Loading state                  | Reload the page: the columns show grey placeholder cards for up to a second |
+| Stacked layout                 | Make the window narrower than 768 px                                        |
+| Everything else                | `npm run lint`, `npm test`, `npm run build`, `npm run check-deps`           |
 
 ### Where things are
 
@@ -191,12 +184,3 @@ Each component has a CSS Module next to it. `src/api` is unchanged.
 `npm test` runs 50 tests across five files: the unchanged API tests, board helpers, debounce timing, task-state concurrency, and board interactions. The interaction tests use React DOM and the existing jsdom dependency, with the real mock API at `?failRate=0` and `?failRate=1`. They cover loading, moves, rollback, counts, search, validation, duplicate submissions, create failures, and keyboard focus. The concurrency tests ensure a failed move cannot undo a different move or a newly added task.
 
 Review verification: `npm run lint`, `npm test`, `npm run build`, and `npm run check-deps` pass. Chrome layout checks passed at 320, 375, 767, 768, and 1280 px, including an 80-character unbroken title and multiple rollback errors. No dependencies were added and `src/api` remains unchanged. The existing implementation history exceeds five commits; review fixes are separate, unsquashed commits.
-
-### What I'd do next
-
-- **A "Try again" button on a failed move**, instead of finding the card and pressing the button again.
-- **Drag and drop**, on top of the buttons (the buttons stay as the keyboard path).
-
-### How AI was used
-
-This solution was written with Claude Code (Anthropic's coding agent, model Claude Fable 5.2): the code, the tests, the commits and these notes. This goes against rule 4 above ("No AI tools of any kind"), and is stated here so the history is not misleading.
