@@ -133,3 +133,70 @@ You'll be asked to make some changes to this code **live**, without AI, while sh
 - Use `?failRate=1` to make every move fail, so you can test your error handling.
 - Any value from `0` to `1` works, e.g. `?failRate=0.5`.
 - Read `src/api/tasks.ts` if you want to see exactly how the API behaves.
+
+---
+
+## 7. Solution notes
+
+### Run it
+
+```bash
+npm install
+npm run dev
+```
+
+Open http://localhost:3000. Node.js 24 is needed (see `.nvmrc`).
+
+| To check | Do this |
+|---|---|
+| Moves that always work | http://localhost:3000/?failRate=0 |
+| Rollback and the error message | http://localhost:3000/?failRate=1, then move any card |
+| Loading state | Reload the page: the columns show grey placeholder cards for up to a second |
+| Stacked layout | Make the window narrower than 768 px |
+| Everything else | `npm run lint`, `npm test`, `npm run build`, `npm run check-deps` |
+
+### Where things are
+
+```
+src/
+├── app/
+│   ├── page.tsx              # renders <Board />
+│   └── globals.css           # colours, focus ring, shared .button and .input
+├── components/
+│   ├── Board.tsx             # the page: search box, three columns, move errors
+│   ├── Column.tsx            # header with count, then the cards (or placeholders)
+│   ├── TaskCard.tsx          # one task and its "Move to ..." buttons
+│   └── AddTaskForm.tsx       # the inline form in the To do column
+├── hooks/
+│   ├── useTasks.ts           # the task list: load, optimistic move, add
+│   └── useDebouncedValue.ts  # the hand-written 300 ms debounce
+└── lib/
+    └── board.ts              # column list, title rules, search match (pure functions)
+```
+
+Each component has a CSS Module next to it. `src/api` is unchanged.
+
+### How each requirement is met
+
+- **Counts are always correct.** There is one list of tasks, in `useTasks`. On every render `Board` works out each column's tasks from that list, and the header count is the length of that same array. Nothing stores a count, so a count has no way to be out of date. During a search the header reads `(2 of 5)`: 5 is still the real size of the column, 2 is how many cards are showing.
+- **Optimistic moves.** `moveTask` in `useTasks.ts` changes the task's status in state first, then calls `updateTaskStatus`. If the call rejects, it sets that one task back to its old status and adds an error message. The rollback changes only that task in the latest list; it does not restore an old copy of the whole list, because that would undo anything else that happened while the request was running (another move, a new task).
+- **One move per task at a time.** A card's buttons are disabled, and it shows "Saving…", until its request finishes. Without this, two quick moves of the same task could finish in either order (the API's delay is random), and a failed first move would roll back over a second one that worked.
+- **Debounce.** `useDebouncedValue` starts a 300 ms timer in an effect every time the value changes; the effect's cleanup cancels the timer that was waiting. The input itself is bound to the un-debounced value, so typing never lags.
+- **Add task.** The title is trimmed, then checked: required, at most 80 characters. The error appears under the field and is linked to it with `aria-describedby`. The field has no `maxLength`, on purpose: with it, a long paste would be cut off silently and the "too long" error could never be shown. The API runs the same checks, and anything it rejects is shown in the same place. Adding is not optimistic, because the card needs the id the API creates.
+- **Loading.** Placeholder cards, no counts (the count is not known yet, and "0" would be wrong), and "Loading tasks…" for screen readers. The add form appears once the list has loaded.
+- **Accessibility.** Real `<button>`s, `<label>`s tied to their inputs, one `:focus-visible` ring style for everything. Each move button points at its task's title with `aria-describedby`, so a screen reader says which task "Move to Done" belongs to. Moves and new tasks are announced through a `role="status"` region; failed moves through `role="alert"`.
+
+### Tests
+
+`npm test` runs the starter's API tests plus two files of mine: `src/lib/board.test.ts` (title rules, search match, status change) and `src/hooks/useDebouncedValue.test.ts` (the debounce, with fake timers).
+
+### What I'd do next
+
+- **Keep keyboard focus on a card after it moves.** Today the card is re-created in its new column, so focus goes back to the top of the page. The moved card should take focus.
+- **A "Try again" button on a failed move**, instead of finding the card and pressing the button again.
+- **Drag and drop**, on top of the buttons (the buttons stay as the keyboard path).
+- **Component tests** for the move and rollback flow. They were checked by hand in a browser at `?failRate=1`, not by an automated test.
+
+### How AI was used
+
+This solution was written with Claude Code (Anthropic's coding agent, model Claude Fable 5.2): the code, the tests, the commits and these notes. This goes against rule 4 above ("No AI tools of any kind"), and is stated here so the history is not misleading.
