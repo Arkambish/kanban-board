@@ -180,22 +180,22 @@ Each component has a CSS Module next to it. `src/api` is unchanged.
 
 - **Counts are always correct.** There is one list of tasks, in `useTasks`. On every render `Board` works out each column's tasks from that list, and the header count is the length of that same array. Nothing stores a count, so a count has no way to be out of date. During a search the header reads `(2 of 5)`: 5 is still the real size of the column, 2 is how many cards are showing.
 - **Optimistic moves.** `moveTask` in `useTasks.ts` changes the task's status in state first, then calls `updateTaskStatus`. If the call rejects, it sets that one task back to its old status and adds an error message. The rollback changes only that task in the latest list; it does not restore an old copy of the whole list, because that would undo anything else that happened while the request was running (another move, a new task).
-- **One move per task at a time.** A card's buttons are disabled, and it shows "Saving…", until its request finishes. Without this, two quick moves of the same task could finish in either order (the API's delay is random), and a failed first move would roll back over a second one that worked.
+- **One move per task at a time.** A synchronous ref lock blocks duplicate requests even before React renders. A card's buttons are disabled, and it shows "Saving…", until its request finishes. Without this, two quick moves of the same task could finish in either order (the API's delay is random), and a failed first move would roll back over a second one that worked.
 - **Debounce.** `useDebouncedValue` starts a 300 ms timer in an effect every time the value changes; the effect's cleanup cancels the timer that was waiting. The input itself is bound to the un-debounced value, so typing never lags.
-- **Add task.** The title is trimmed, then checked: required, at most 80 characters. The error appears under the field and is linked to it with `aria-describedby`. The field has no `maxLength`, on purpose: with it, a long paste would be cut off silently and the "too long" error could never be shown. The API runs the same checks, and anything it rejects is shown in the same place. Adding is not optimistic, because the card needs the id the API creates.
+- **Add task.** The title is trimmed, then checked: required, at most 80 characters. The error appears under the field and is linked to it with `aria-describedby`. The field has no `maxLength`, on purpose: with it, a long paste would be cut off silently and the "too long" error could never be shown. The API runs the same checks, and anything it rejects is shown in the same place. Adding is not optimistic, because the card needs the id the API creates. A synchronous lock also prevents duplicate form submissions. When saving finishes, focus returns to the title only if the user is still in the form.
 - **Loading.** Placeholder cards, no counts (the count is not known yet, and "0" would be wrong), and "Loading tasks…" for screen readers. The add form appears once the list has loaded.
-- **Accessibility.** Real `<button>`s, `<label>`s tied to their inputs, one `:focus-visible` ring style for everything. Each move button points at its task's title with `aria-describedby`, so a screen reader says which task "Move to Done" belongs to. Moves and new tasks are announced through a `role="status"` region; failed moves through `role="alert"`.
+- **Accessibility.** Real `<button>`s, `<label>`s tied to their inputs, one `:focus-visible` ring style for everything. Each move button points at its task's title with `aria-describedby`, so a screen reader says which task "Move to Done" belongs to. Moves and new tasks are announced through a `role="status"` region; failed moves through `role="alert"`. Focus follows the task heading when a move or rollback remounts the card, unless the user has moved to another control. Validation errors are also announced. Multiple move errors scroll within a panel limited to 40% of the viewport height.
 
 ### Tests
 
-`npm test` runs the starter's API tests plus two files of mine: `src/lib/board.test.ts` (title rules, search match, status change) and `src/hooks/useDebouncedValue.test.ts` (the debounce, with fake timers).
+`npm test` runs 50 tests across five files: the unchanged API tests, board helpers, debounce timing, task-state concurrency, and board interactions. The interaction tests use React DOM and the existing jsdom dependency, with the real mock API at `?failRate=0` and `?failRate=1`. They cover loading, moves, rollback, counts, search, validation, duplicate submissions, create failures, and keyboard focus. The concurrency tests ensure a failed move cannot undo a different move or a newly added task.
+
+Review verification: `npm run lint`, `npm test`, `npm run build`, and `npm run check-deps` pass. Chrome layout checks passed at 320, 375, 767, 768, and 1280 px, including an 80-character unbroken title and multiple rollback errors. No dependencies were added and `src/api` remains unchanged. The existing implementation history exceeds five commits; review fixes are separate, unsquashed commits.
 
 ### What I'd do next
 
-- **Keep keyboard focus on a card after it moves.** Today the card is re-created in its new column, so focus goes back to the top of the page. The moved card should take focus.
 - **A "Try again" button on a failed move**, instead of finding the card and pressing the button again.
 - **Drag and drop**, on top of the buttons (the buttons stay as the keyboard path).
-- **Component tests** for the move and rollback flow. They were checked by hand in a browser at `?failRate=1`, not by an automated test.
 
 ### How AI was used
 
