@@ -42,3 +42,32 @@
   border: 1px solid var(--danger-border);
   border-radius: var(--radius);
 }
+
+/*
+ * Move errors sit at the bottom of the window, not the top of the page, so
+ * they are seen even when the board is scrolled (it gets long on a phone).
+ */
+.errors {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+}

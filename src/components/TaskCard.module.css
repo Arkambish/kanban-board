@@ -21,3 +21,16 @@
   font-size: 0.8125rem;
   color: var(--text-muted);
 }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+}
+
+.saving {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}

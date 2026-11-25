@@ -6,7 +6,16 @@ import { Column } from './Column';
 import styles from './Board.module.css';
 
 export function Board() {
-  const { tasks, loadState, reload } = useTasks();
+  const {
+    tasks,
+    loadState,
+    reload,
+    pendingIds,
+    moveTask,
+    moveErrors,
+    dismissMoveError,
+    announcement,
+  } = useTasks();
   const isLoading = loadState === 'loading';
 
   return (
@@ -15,7 +24,7 @@ export function Board() {
 
       {/* Read out by screen readers; sighted users see the placeholder cards instead. */}
       <p role="status" className="visually-hidden">
-        {isLoading ? 'Loading tasks…' : ''}
+        {isLoading ? 'Loading tasks…' : announcement}
       </p>
 
       {loadState === 'error' ? (
@@ -34,10 +43,28 @@ export function Board() {
               label={column.label}
               tasks={tasks.filter((task) => task.status === column.status)}
               isLoading={isLoading}
+              pendingIds={pendingIds}
+              onMove={moveTask}
             />
           ))}
         </div>
       )}
+
+      {/* Always on the page so screen readers announce an error the moment it is added. */}
+      <div role="alert" className={styles.errors}>
+        {moveErrors.map((error) => (
+          <div key={error.taskId} className={styles.error}>
+            <p>{error.message}</p>
+            <button
+              type="button"
+              className="button"
+              onClick={() => dismissMoveError(error.taskId)}
+            >
+              Dismiss
+            </button>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

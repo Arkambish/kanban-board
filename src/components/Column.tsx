@@ -8,9 +8,12 @@ interface ColumnProps {
   /** The tasks in this column. */
   tasks: Task[];
   isLoading: boolean;
+  /** Ids of tasks whose move is still being saved. */
+  pendingIds: string[];
+  onMove: (task: Task, nextStatus: TaskStatus) => void;
 }
 
-export function Column({ status, label, tasks, isLoading }: ColumnProps) {
+export function Column({ status, label, tasks, isLoading, pendingIds, onMove }: ColumnProps) {
   const headingId = `column-${status}`;
 
   return (
@@ -28,7 +31,12 @@ export function Column({ status, label, tasks, isLoading }: ColumnProps) {
       ) : (
         <ul className={styles.list}>
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard
+              key={task.id}
+              task={task}
+              isPending={pendingIds.includes(task.id)}
+              onMove={onMove}
+            />
           ))}
         </ul>
       )}
