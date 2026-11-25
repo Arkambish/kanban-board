@@ -1,0 +1,56 @@
+.column {
+  /* Lets long titles wrap instead of stretching the grid column. */
+  min-width: 0;
+  padding: 0.75rem;
+  background: var(--column);
+  border-radius: var(--radius);
+}
+
+.heading {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.count {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.empty {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.placeholder {
+  height: 4.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  animation: pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* People who ask their system for less motion get still placeholders. */
+@media (prefers-reduced-motion: reduce) {
+  .placeholder {
+    animation: none;
+  }
+}

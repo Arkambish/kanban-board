@@ -35,3 +35,73 @@ h2,
 h3 {
   overflow-wrap: break-word;
 }
+
+/* ------------------------------------------------------------------------ */
+/* Board styles shared by every component                                    */
+/* ------------------------------------------------------------------------ */
+
+:root {
+  --text: #1a1f27;
+  --text-muted: #56606e;
+  --page: #ffffff;
+  --column: #eef2f7;
+  --surface: #ffffff;
+  --border: #c9d1dc;
+  --focus: #1d4ed8;
+  --danger-text: #8f1d1d;
+  --danger-bg: #fdecec;
+  --danger-border: #e5a3a3;
+  --radius: 6px;
+}
+
+body {
+  color: var(--text);
+  background: var(--page);
+}
+
+/* A clear ring on whatever has keyboard focus. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.button {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.75rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--column);
+  border-color: var(--text-muted);
+}
+
+.button:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input {
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* On the page for screen readers, but not visible. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
